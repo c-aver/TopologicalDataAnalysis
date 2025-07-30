@@ -45,16 +45,15 @@ def get_data(file_path):
     df = pd.read_csv(file_path)
     nd = df.to_numpy()
     np.random.seed(0)
-    nd = nd[np.random.choice(len(nd), size=len(nd) // 3, replace=False)]  # ADJUST: random drop-out
-    x = nd[:, 0]
-    y = nd[:, 1]
+    nd = nd[np.random.choice(len(nd), size=len(nd) // 2, replace=False)]  # ADJUST: random drop-out
 
-    plt.plot(x, y, 'o')
+    plt.plot(nd[:, 0], nd[:, 1], 'o')
     plt.show()
 
     data = [(float(x), float(y)) for [x, y] in nd]
     data = list(set(data))  # remove repetitions
     # data = [(0.3, 1), (-0.81, 0.5879), (-0.81, -0.5877), (0.3, -0.98), (1, 0)]
+    # data = [(-0.81, 0.5879), (-0.81, -0.5879), (0.3, -1), (1, 0), (0.3, 1)]
     # data = [(0.01, 1), (1.02, 0), (0, -0.99), (-1, 0.02)]
     return data
 
@@ -85,9 +84,11 @@ def main():
     for x1 in data:
         for x2 in data:
             if x1 < x2:
-                if dist_sq(x1, x2) in dists_sq:
-                    dists_sq[dist_sq(x1, x2)] += [(x1, x2)]
-                dists_sq[dist_sq(x1, x2)] = [(x1, x2)]
+                value = dist_sq(x1, x2)
+                if value in dists_sq:
+                    dists_sq[value] += [(x1, x2)]
+                else:
+                    dists_sq[value] = [(x1, x2)]
     # plt.hist(dists_sq, bins=1000)
     # plt.show()
     # exit(0)
@@ -124,7 +125,7 @@ def main():
             #     for simp in itertools.combinations(data, p):
             #         if x1 in simp or x2 in simp:
             #             continue
-            #         if tuple(sorted(simp + (x1,))) in simplices[p+1] and tuple(sorted(simp + (x2,))) in simplices[p + 1]:
+            #         if tuple(sorted(simp + (x1,))) in simplices[p+1] and tuple(sorted(simp + (x2,))) in simplices[p+1]:
             #             new_simp = tuple(sorted(simp + (x1, x2)))
             #             simplices[p + 2].append(new_simp)
             #             simplices_set.add(new_simp)
@@ -141,6 +142,8 @@ def main():
                     continue
                 if dist_sq(x, x1) <= curr_dist_sq and dist_sq(x, x2) <= curr_dist_sq:
                     new_simp = tuple(sorted((x1, x2, x)))
+                    if new_simp in simplices_set:
+                        continue
                     simplices[3].append(new_simp)
                     simplices_set.add(new_simp)
                     simplices_births[3][len(simplices[3]) - 1] = math.sqrt(curr_dist_sq)
@@ -157,11 +160,7 @@ def main():
                 if x in simp:
                     continue
                 new_simp = tuple(sorted(simp + (x,)))
-                if new_simp in simplices_set:
-                    boundary_matrices[p][i][simplices_indices[p + 1][new_simp]] = 1
-                else:
-                    # print("problemo")
-                    ...
+                boundary_matrices[p][i][simplices_indices[p + 1][new_simp]] = 1
 
     birth_simplices = [set() for _ in
                        range(max_p + 1)]  # store birth simplices, remove when finding corresponding terminal
@@ -183,16 +182,13 @@ def main():
                 zeroer = pivots[pivot]
                 matrix[:, c] ^= matrix[:, zeroer]
                 pivot = find_pivot(matrix, c)
-            if pivot is not None:
-                pivots[pivot] = c
-                terminal_simplices[p + 1][c] = pivot
-                try:
-                    birth_simplices[p].remove(pivot)
-                except KeyError:
-                    pass
-                next_impossible_pivots.add(c)
             if pivot is None or p == 0:
                 birth_simplices[p + 1].add(c)
+            elif pivot is not None:
+                pivots[pivot] = c
+                terminal_simplices[p + 1][c] = pivot
+                birth_simplices[p].remove(pivot)
+                next_impossible_pivots.add(c)
 
     terminal_points = [[(simplices_births[p][birth], simplices_births[p + 1][death])
                         for death, birth in terminal_simplices[p + 1].items()]
@@ -201,7 +197,7 @@ def main():
                      for birth in birth_simplices[p]]
                     for p in range(max_p - 1 + 1)]
 
-    show_diagram(terminal_points, birth_points, [1, 2])
+    show_diagram(terminal_points, birth_points, range(1, max_p - 1 + 1))
 
 
 if __name__ == '__main__':
