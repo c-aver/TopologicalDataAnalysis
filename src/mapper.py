@@ -1,6 +1,7 @@
 import itertools
 import math
 
+import numpy as np
 import pandas as pd
 import networkx as nx
 from scipy.cluster.hierarchy import DisjointSet
@@ -105,19 +106,34 @@ def create_mapper_graph(data, config):
 
 
 def main():
-    config = {  # ADJUST: to your liking
-        'filter_function': eccentricity,    # the filter function that maps points to the number line
-        'num_intervals': 20,                # number of intervals to take on the number line, within the range
-        'gain': 0.4,                        # how much overlap is between intervals, should stay < 0.5 maybe
-        'distance_threshold': 2.0           # threshold before clustering gives us
-    }
-
     data = get_data("data/exploratory_data.csv")
 
-    g = create_mapper_graph(data, config)
+    possible_filters = [x_proj, y_proj, eccentricity, centrality]
+    possible_num_intervals = range(10, 20, 5)
+    possible_gain = np.linspace(0.2, 0.4, 3)
+    possible_distance_thresholds = np.linspace(1.2, 5, 3)
 
-    nx.draw(g)
-    plt.show()
+    for filter_function, num_intervals, gain, distance_threshold \
+            in itertools.product(possible_filters,
+                                 possible_num_intervals,
+                                 possible_gain,
+                                 possible_distance_thresholds):
+        config = {  # ADJUST: to your liking
+            'filter_function': filter_function,  # the filter function that maps points to the number line
+            'num_intervals': num_intervals,  # number of intervals to take on the number line, within range
+            'gain': gain,  # how much overlap is between intervals, should stay < 0.5 maybe
+            'distance_threshold': distance_threshold  # threshold before clustering gives us
+        }
+
+        g = create_mapper_graph(data, config)
+
+        plt.figure()
+        plt.title(f"Filter: {config['filter_function'].__name__},"
+                  f" # Intervals: {config['num_intervals']},"
+                  f" Gain: {config['gain']},"
+                  f" Threshold: {config['distance_threshold']}")
+        nx.draw(g)
+        plt.show()
 
 
 if __name__ == '__main__':
