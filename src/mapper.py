@@ -67,27 +67,31 @@ def preimage(interval, ps, f):
     return [p for p in ps if mn <= f(p) <= mx]
 
 
+def split_to_intervals(f_min, f_max, num_intervals, gain):
+    f_range = f_max - f_min
+    interval_length = f_range / num_intervals
+
+    intervals = [(f_min + i * interval_length, f_min + (i + 1) * interval_length) for i in range(num_intervals)]
+    # print(intervals)
+    interval_extension = gain * interval_length
+    intervals = [(mn - interval_extension, mx + interval_extension) for (mn, mx) in intervals]
+    # print(intervals)
+    # for interval in intervals:
+    #     print(preimage(interval, data))
+    return intervals
+
+
 def create_mapper_graph(data, config):
     filter_function = config['filter_function']
     if 'data' in signature(filter_function).parameters:
         filter_function(None, data)
     f_min = filter_function(min(data, key=filter_function))
     f_max = filter_function(max(data, key=filter_function))
-    f_range = f_max - f_min
     # print(f_min, f_max)
 
     num_intervals = config['num_intervals']
-
-    interval_length = f_range / num_intervals
-
-    intervals = [(f_min + i * interval_length, f_min + (i + 1) * interval_length) for i in range(num_intervals)]
-    # print(intervals)
     gain = config['gain']
-    interval_extension = gain * interval_length
-    intervals = [(mn - interval_extension, mx + interval_extension) for (mn, mx) in intervals]
-    # print(intervals)
-    # for interval in intervals:
-    #     print(preimage(interval, data))
+    intervals = split_to_intervals(f_min, f_max, num_intervals, gain)
 
     distance_threshold = config['distance_threshold']
     clusters = []
@@ -108,6 +112,7 @@ def create_mapper_graph(data, config):
 def main():
     data = get_data("data/exploratory_data.csv")
 
+    # ADJUST: choose parameter possible values
     possible_filters = [x_proj, y_proj, eccentricity, centrality]
     possible_num_intervals = range(10, 20, 5)
     possible_gain = np.linspace(0.2, 0.4, 3)
@@ -118,7 +123,7 @@ def main():
                                  possible_num_intervals,
                                  possible_gain,
                                  possible_distance_thresholds):
-        config = {  # ADJUST: to your liking
+        config = {
             'filter_function': filter_function,  # the filter function that maps points to the number line
             'num_intervals': num_intervals,  # number of intervals to take on the number line, within range
             'gain': gain,  # how much overlap is between intervals, should stay < 0.5 maybe
