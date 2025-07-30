@@ -34,10 +34,9 @@ def vietoris_rips_complex(p: list[tuple[float, float]], r: float, k: int | None 
 
 def find_pivot(matrix, c):
     column = matrix[:, c]
-    possible_places = column
-    if not np.any(possible_places):
+    if not np.any(column):
         return None
-    index = np.max(np.argmax(possible_places))
+    index = len(column) - np.max(np.argmax(column[::-1])) - 1   # argmax finds first occurrence, we reverse to find last
     return index
 
 
@@ -188,7 +187,7 @@ def main():
                 pivots[pivot] = c
                 terminal_simplices[p + 1][c] = pivot
                 birth_simplices[p].remove(pivot)
-                next_impossible_pivots.add(c)
+                # next_impossible_pivots.add(c)
 
     terminal_points = [[(simplices_births[p][birth], simplices_births[p + 1][death])
                         for death, birth in terminal_simplices[p + 1].items()]
