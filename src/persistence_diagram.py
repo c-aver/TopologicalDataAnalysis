@@ -51,9 +51,6 @@ def get_data(file_path):
 
     data = [(float(x), float(y)) for [x, y] in nd]
     data = list(set(data))  # remove repetitions
-    # data = [(0.3, 1), (-0.81, 0.5879), (-0.81, -0.5877), (0.3, -0.98), (1, 0)]
-    # data = [(-0.81, 0.5879), (-0.81, -0.5879), (0.3, -1), (1, 0), (0.3, 1)]
-    # data = [(0.01, 1), (1.02, 0), (0, -0.99), (-1, 0.02)]
     return data
 
 
