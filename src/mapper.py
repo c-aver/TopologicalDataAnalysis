@@ -6,6 +6,8 @@ import networkx as nx
 from scipy.cluster.hierarchy import DisjointSet
 from matplotlib import pyplot as plt
 
+from inspect import signature
+
 
 def get_data(file_path):
     df = pd.read_csv(file_path)
@@ -65,32 +67,40 @@ def preimage(interval, ps, f):
 
 
 def main():
+    config = {  # ADJUST: to your liking
+        'filter_function': eccentricity,    # the filter function that maps points to the number line
+        'num_intervals': 20,                # number of intervals to take on the number line, within the range
+        'gain': 0.4,                        # how much overlap is between intervals, should stay < 0.5 maybe
+        'distance_threshold': 2.0           # threshold before clustering gives us
+    }
+
     data = get_data("data/exploratory_data.csv")
 
-    f = eccentricity  # ADJUST: filter function
-    f(None, data)
-    f_min = f(min(data, key=f))
-    f_max = f(max(data, key=f))
+    filter_function = config['filter_function']
+    if 'data' in signature(filter_function).parameters:
+        filter_function(None, data)
+    f_min = filter_function(min(data, key=filter_function))
+    f_max = filter_function(max(data, key=filter_function))
     f_range = f_max - f_min
     # print(f_min, f_max)
 
-    num_intervals = 20  # ADJUST: number of intervals
+    num_intervals = config['num_intervals']
 
     interval_length = f_range / num_intervals
 
     intervals = [(f_min + i * interval_length, f_min + (i + 1) * interval_length) for i in range(num_intervals)]
     # print(intervals)
-    gain = 0.4  # ADJUST: gain, should stay <0.5 maybe
+    gain = config['gain']
     interval_extension = gain * interval_length
     intervals = [(mn - interval_extension, mx + interval_extension) for (mn, mx) in intervals]
     # print(intervals)
     # for interval in intervals:
     #     print(preimage(interval, data))
 
-    distance_threshold = 2  # ADJUST
+    distance_threshold = config['distance_threshold']
     clusters = []
     for interval in intervals:
-        clusters += single_linkage(preimage(interval, data, f), dist, distance_threshold)
+        clusters += single_linkage(preimage(interval, data, filter_function), dist, distance_threshold)
 
     g = nx.Graph()
     for cluster in clusters:
