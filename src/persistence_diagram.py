@@ -121,7 +121,8 @@ def main():
             #     for simp in itertools.combinations(data, p):
             #         if x1 in simp or x2 in simp:
             #             continue
-            #         if tuple(sorted(simp + (x1,))) in simplices[p+1] and tuple(sorted(simp + (x2,))) in simplices[p+1]:
+            #         if (tuple(sorted(simp + (x1,))) in simplices[p + 1]
+            #                 and tuple(sorted(simp + (x2,))) in simplices[p + 1]):
             #             new_simp = tuple(sorted(simp + (x1, x2)))
             #             simplices[p + 2].append(new_simp)
             #             simplices_set.add(new_simp)
