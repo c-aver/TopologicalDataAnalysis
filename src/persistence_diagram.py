@@ -79,7 +79,7 @@ def show_diagram(terminal_points, birth_points, ps):
 
 
 def main():
-    data = get_data("../data/data_A.csv")
+    data = get_data("data/data_A.csv")
 
     dists_sq = {}
     for x1 in data:
