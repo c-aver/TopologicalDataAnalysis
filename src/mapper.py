@@ -66,16 +66,7 @@ def preimage(interval, ps, f):
     return [p for p in ps if mn <= f(p) <= mx]
 
 
-def main():
-    config = {  # ADJUST: to your liking
-        'filter_function': eccentricity,    # the filter function that maps points to the number line
-        'num_intervals': 20,                # number of intervals to take on the number line, within the range
-        'gain': 0.4,                        # how much overlap is between intervals, should stay < 0.5 maybe
-        'distance_threshold': 2.0           # threshold before clustering gives us
-    }
-
-    data = get_data("data/exploratory_data.csv")
-
+def create_mapper_graph(data, config):
     filter_function = config['filter_function']
     if 'data' in signature(filter_function).parameters:
         filter_function(None, data)
@@ -109,6 +100,21 @@ def main():
     for c1, c2 in itertools.combinations(clusters, 2):
         if not c1.isdisjoint(c2):
             g.add_edge(clusters.index(c1), clusters.index(c2))
+
+    return g
+
+
+def main():
+    config = {  # ADJUST: to your liking
+        'filter_function': eccentricity,    # the filter function that maps points to the number line
+        'num_intervals': 20,                # number of intervals to take on the number line, within the range
+        'gain': 0.4,                        # how much overlap is between intervals, should stay < 0.5 maybe
+        'distance_threshold': 2.0           # threshold before clustering gives us
+    }
+
+    data = get_data("data/exploratory_data.csv")
+
+    g = create_mapper_graph(data, config)
 
     nx.draw(g)
     plt.show()
