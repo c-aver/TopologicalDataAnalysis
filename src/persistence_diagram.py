@@ -91,7 +91,7 @@ def main():
     # plt.hist(dists_sq, bins=1000)
     # plt.show()
     # exit(0)
-    max_p = 3  # ADJUST: 3
+    max_p = 3
     simplices = [[] for _ in range(max_p + 1)]  # store all simplices for each dimension by order created
     simplices_set = set()  # remember all simplices that exist
     simplices_births = [{} for _ in
@@ -109,7 +109,7 @@ def main():
     for i, simp in enumerate(simplices[1]):
         simplices_indices[1][simp] = i
 
-    max_dist_sq = float('inf')  # ADJUST
+    max_dist_sq = float('inf')  # if taking too long, can change to stop filtration early
     print("Calculating simplex order")
     for i, (curr_dist_sq, dist_pairs) in enumerate(sorted(dists_sq.items())):
         for (x1, x2) in dist_pairs:
