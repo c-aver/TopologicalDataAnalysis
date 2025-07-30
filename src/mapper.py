@@ -67,17 +67,14 @@ def preimage(interval, ps, f):
     return [p for p in ps if mn <= f(p) <= mx]
 
 
-def split_to_intervals(f_min, f_max, num_intervals, gain):
-    f_range = f_max - f_min
+def create_intervals(range_min, range_max, num_intervals, gain):
+    f_range = range_max - range_min
     interval_length = f_range / num_intervals
 
-    intervals = [(f_min + i * interval_length, f_min + (i + 1) * interval_length) for i in range(num_intervals)]
-    # print(intervals)
+    intervals = [(range_min + i * interval_length, range_min + (i + 1) * interval_length) for i in range(num_intervals)]
     interval_extension = gain * interval_length
     intervals = [(mn - interval_extension, mx + interval_extension) for (mn, mx) in intervals]
-    # print(intervals)
-    # for interval in intervals:
-    #     print(preimage(interval, data))
+
     return intervals
 
 
@@ -91,7 +88,10 @@ def create_mapper_graph(data, config):
 
     num_intervals = config['num_intervals']
     gain = config['gain']
-    intervals = split_to_intervals(f_min, f_max, num_intervals, gain)
+    intervals = create_intervals(f_min, f_max, num_intervals, gain)
+    # print(intervals)
+    # for interval in intervals:
+    #     print(preimage(interval, data, filter_function))
 
     distance_threshold = config['distance_threshold']
     clusters = []
@@ -116,7 +116,7 @@ def main():
     possible_filters = [x_proj, y_proj, eccentricity, centrality]
     possible_num_intervals = range(10, 20, 5)
     possible_gain = np.linspace(0.2, 0.4, 3)
-    possible_distance_thresholds = np.linspace(1.2, 5, 3)
+    possible_distance_thresholds = np.linspace(0.3, 1, 3)
 
     for filter_function, num_intervals, gain, distance_threshold \
             in itertools.product(possible_filters,
