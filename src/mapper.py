@@ -33,6 +33,9 @@ def x_proj(p): return p[0]  # projection onto axis
 def y_proj(p): return p[1]  # projection onto axis
 
 
+def dist_from_origin(p): return math.sqrt(p[0]**2 + p[1]**2)
+
+
 def centrality(p, data=None):
     if data is not None:
         centrality.data = data
@@ -117,6 +120,7 @@ def main():
     possible_num_intervals = range(10, 21, 5)
     possible_gains = np.linspace(0.2, 0.4, 3)
     possible_distance_thresholds = np.linspace(0.3, 1, 3)
+    possible_filters = [x_proj, y_proj, eccentricity, centrality, dist_from_origin]
 
     for filter_function, num_intervals, gain, distance_threshold \
             in itertools.product(possible_filters,
