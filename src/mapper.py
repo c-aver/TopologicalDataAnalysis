@@ -53,12 +53,12 @@ def eccentricity(p, data=None):
 
 def single_linkage(ps, d, thresh):
     ds = DisjointSet(ps)
-    curr_dist = 0
-    while ds.n_subsets > 1 and curr_dist < thresh:
+    while ds.n_subsets > 1:
         s1, s2 = min(itertools.combinations(ds.subsets(), 2), key=lambda subset_pair: d(
             *min(itertools.product(*subset_pair), key=lambda point_pair: d(*point_pair))))
+        if d(*min(itertools.product(s1, s2), key=lambda t: d(*t))) > thresh:
+            break
         ds.merge(next(iter(s1)), next(iter(s2)))
-        curr_dist = d(*min(itertools.product(s1, s2), key=lambda t: d(*t)))
     return ds.subsets()
 
 
@@ -100,11 +100,11 @@ def create_mapper_graph(data, config):
 
     g = nx.Graph()
     for cluster in clusters:
-        g.add_node(clusters.index(cluster))
+        g.add_node(tuple(cluster))
 
     for c1, c2 in itertools.combinations(clusters, 2):
         if not c1.isdisjoint(c2):
-            g.add_edge(clusters.index(c1), clusters.index(c2))
+            g.add_edge(tuple(c1), tuple(c2))
 
     return g
 
@@ -114,30 +114,30 @@ def main():
 
     # ADJUST: choose parameter possible values
     possible_filters = [x_proj, y_proj, eccentricity, centrality]
-    possible_num_intervals = range(10, 20, 5)
-    possible_gain = np.linspace(0.2, 0.4, 3)
+    possible_num_intervals = range(10, 21, 5)
+    possible_gains = np.linspace(0.2, 0.4, 3)
     possible_distance_thresholds = np.linspace(0.3, 1, 3)
 
     for filter_function, num_intervals, gain, distance_threshold \
             in itertools.product(possible_filters,
                                  possible_num_intervals,
-                                 possible_gain,
+                                 possible_gains,
                                  possible_distance_thresholds):
         config = {
             'filter_function': filter_function,  # the filter function that maps points to the number line
             'num_intervals': num_intervals,  # number of intervals to take on the number line, within range
-            'gain': gain,  # how much overlap is between intervals, should stay < 0.5 maybe
+            'gain': gain,  # how much overlap is between intervals, should stay < 0.5 probably
             'distance_threshold': distance_threshold  # threshold before clustering gives us
         }
 
         g = create_mapper_graph(data, config)
 
-        plt.figure()
-        plt.title(f"Filter: {config['filter_function'].__name__},"
-                  f" # Intervals: {config['num_intervals']},"
-                  f" Gain: {config['gain']},"
-                  f" Threshold: {config['distance_threshold']}")
-        nx.draw(g)
+        f, ax = plt.subplots(1)
+        ax.set_title(f"Filter: {config['filter_function'].__name__},"
+                     f" # Intervals: {config['num_intervals']},"
+                     f" Gain: {config['gain']},"
+                     f" Threshold: {config['distance_threshold']}")
+        nx.draw_networkx(g, node_size=100, pos={node: np.average(node, axis=0) for node in g.nodes}, with_labels=False, ax=ax)
         plt.show()
 
 
