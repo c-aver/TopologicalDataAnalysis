@@ -116,11 +116,10 @@ def main():
     data = get_data("data/exploratory_data.csv")
 
     # ADJUST: choose parameter possible values
-    possible_filters = [x_proj, y_proj, eccentricity, centrality]
+    possible_filters = [x_proj, y_proj, eccentricity, centrality, dist_from_origin]
     possible_num_intervals = range(10, 21, 5)
     possible_gains = np.linspace(0.2, 0.4, 3)
     possible_distance_thresholds = np.linspace(0.3, 1, 3)
-    possible_filters = [x_proj, y_proj, eccentricity, centrality, dist_from_origin]
 
     for filter_function, num_intervals, gain, distance_threshold \
             in itertools.product(possible_filters,
