@@ -44,7 +44,7 @@ def get_data(file_path):
     df = pd.read_csv(file_path)
     nd = df.to_numpy()
     np.random.seed(0)
-    nd = nd[np.random.choice(len(nd), size=len(nd) // 2, replace=False)]  # ADJUST: random drop-out
+    nd = nd[np.random.choice(len(nd), size=int(len(nd) * 1), replace=False)]  # ADJUST: random drop-out
 
     plt.plot(nd[:, 0], nd[:, 1], 'o')
     plt.show()
